@@ -1,4 +1,7 @@
 const Blog = require('../models/blog')
+const User = require('../models/user')
+
+const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjVmMDViZGIxZDMxNjU5MDg3ZjMyZGU1MCIsImlhdCI6MTU5NDIxNzk0Mn0.Jyc6PHhVGRlB9Sde1LYcyL0BKCDU_lBYlGV0CErs17M'
 
 const initialBlogs = [
     {
@@ -7,6 +10,7 @@ const initialBlogs = [
         author: 'Edsger W. Dijkstra',
         url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
         likes: 5,
+        user: '5f05bdb1d31659087f32de50',
         __v: 0
     },
     {
@@ -15,6 +19,7 @@ const initialBlogs = [
         author: 'Joseph Kelley',
         url: 'www.mongodb4dummies.net',
         likes: 16,
+        user: '5f05bdb1d31659087f32de50',
         __v: 0
     },
     {
@@ -23,6 +28,7 @@ const initialBlogs = [
         author: 'Yannis K. Marg',
         url: 'www.dev.to/ykmarg/me-n-stack-holy-grail',
         likes: 11,
+        user: '5f05bdb1d31659087f32de50',
         __v: 0
     }
 ]
@@ -39,9 +45,18 @@ const nonExistentId = async () => {
 
 const blogsInDb = async () => {
     const blogs = await Blog.find({})
-    return blogs.map(blog => blog.toJSON())
+    return blogs.map(b => b.toJSON())
+}
+
+const usersInDb = async () => {
+    const users = await User.find({})
+    return users.map(u => u.toJSON())
 }
 
 module.exports = {
-    initialBlogs, nonExistentId, blogsInDb
+    token,
+    initialBlogs,
+    nonExistentId,
+    blogsInDb,
+    usersInDb
 }

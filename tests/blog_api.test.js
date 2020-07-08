@@ -29,7 +29,7 @@ describe('api get all', () => {
     })
 })
 
-describe('api post', () => {
+describe('api post', () => {      
 
     test('a valid blog can be added', async () => {
         const newBlog = {
@@ -38,8 +38,9 @@ describe('api post', () => {
             url: "https://reactpatterns.com/",
             likes: 7
         }
-        
+
         await api.post('/api/blogs')
+        .set('Authorization', `Bearer ${helper.token}`)
         .send(newBlog)
         .expect(200)
         .expect('Content-Type', /application\/json/)
@@ -58,6 +59,7 @@ describe('api post', () => {
         }
 
         await api.post('/api/blogs')
+        .set('Authorization', `Bearer ${helper.token}`)
         .send(newBlog)
         .expect(200)
 
@@ -72,7 +74,9 @@ describe('api post', () => {
             url: "https://reactpatterns.com/",
             likes: 7
         }
+        
         await api.post('/api/blogs')
+        .set('Authorization', `Bearer ${helper.token}`)
         .send(newBlog)
         .expect(400)
         
@@ -86,21 +90,45 @@ describe('api post', () => {
             author: "Michael Chan",
             likes: 7
         }
+        
         await api.post('/api/blogs')
+        .set('Authorization', `Bearer ${helper.token}`)
         .send(newBlog)
         .expect(400)
         
         const blogsAtEnd = await helper.blogsInDb()
         expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
     })
+
+    test('fails with proper status code and message if invalid token', async () => {
+        const newBlog = {
+            title: "React patterns",
+            author: "Michael Chan",
+            url: "https://reactpatterns.com/",
+            likes: 7
+        }
+
+        const result = await api.post('/api/blogs')
+        .set('Authorization', `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjVmMDViZGIxZDMxNjU5MDg3Z`)
+        .send(newBlog)
+        .expect(401)
+
+        const blogsAtEnd = await helper.blogsInDb()
+        expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+
+        expect(result.body.error).toContain('invalid token')
+    })
 })
 
+// FIXME: api delete tests will fail due to missing token
 describe('api delete', () => {
 
     test('succeeds with status code 204 if valid id', async () => {
         const blogsAtStart = await helper.blogsInDb()
         const blogToDelete = blogsAtStart[0]
+        
         await api.delete(`/api/blogs/${blogToDelete.id}`)
+        .set('Authorization', `Bearer ${helper.token}`)
         .expect(204)
 
         const blogsAtEnd = await helper.blogsInDb()
@@ -108,6 +136,20 @@ describe('api delete', () => {
 
         const titles = blogsAtEnd.map(b => b.title)
         expect(titles).not.toContain(blogToDelete.title)
+    })
+
+    test('fails with status code 401 if invalid token', async () => {
+        const blogsAtStart = await helper.blogsInDb()
+        const blogToDelete = blogsAtStart[0]
+        
+        const result = await api.delete(`/api/blogs/${blogToDelete.id}`)
+        .set('Authorization', `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjVmMDViZGIxZDMxNjU5MDg3Z`)
+        .expect(401)
+
+        const blogsAtEnd = await helper.blogsInDb()
+        expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+
+        expect(result.body.error).toContain('invalid token')
     })
 })
 
@@ -125,7 +167,6 @@ describe('api put', () => {
         expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
 
         const updatedBlog = blogsAtEnd.find(b => b.id === blogToUpdate.id)
-        console.log(updatedBlog)
         expect(updatedBlog.likes).toBe(blogToUpdate.likes)
     })
 })

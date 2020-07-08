@@ -19,10 +19,12 @@ const unknownEndpoint = (req, res) => {
 }
 
 const errorHandler = (e, req, res, next) => {
-    logger.error(e.message)
     if (e.name === 'ValidationError') {
 		return res.status(400).json({ error: e.message })
-	}
+	} else if (e.name === 'JsonWebTokenError') {
+        return res.status(401).json({ error: 'invalid token' })
+    }
+    logger.error(e.message)
     next(e)
 }
 
