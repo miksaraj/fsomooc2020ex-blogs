@@ -14,6 +14,9 @@ const unknownEndpoint = (req, res) => {
 
 const errorHandler = (e, req, res, next) => {
     logger.error(e.message)
+    if (e.name === 'ValidationError') {
+		return res.status(400).json({ error: e.message })
+	}
     next(e)
 }
 
