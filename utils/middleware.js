@@ -8,6 +8,12 @@ const requestLogger = (req, res, next) => {
     next()
 }
 
+const responseLogger = (req, res, next) => {
+    logger.info('Status:', res.statusCode)
+    logger.info('---')
+    next()
+}
+
 const unknownEndpoint = (req, res) => {
     res.status(404).send({ error: 'unknown endpoint' })
 }
@@ -22,6 +28,7 @@ const errorHandler = (e, req, res, next) => {
 
 module.exports = {
     requestLogger,
+    responseLogger,
     unknownEndpoint,
     errorHandler
 }
