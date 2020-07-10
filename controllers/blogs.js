@@ -12,7 +12,7 @@ const getTokenFrom = req => {
 }
 
 blogsRouter.get('/', async (req, res) => {
-    const blogs = await Blog.find({}).populate('user', { username: 1 })
+    const blogs = await Blog.find({}).populate('user', { name: 1 })
     res.json(blogs.map(blog => blog.toJSON()))
 })
 
@@ -33,10 +33,12 @@ blogsRouter.post('/', async (req, res) => {
         likes: body.likes || 0,
         user: user._id
     })
-    const savedBlog = await blog.save()
+    let savedBlog = await blog.save()
 
     user.blogs = user.blogs.concat(savedBlog._id)
     await user.save()
+
+    savedBlog = await Blog.findById(savedBlog._id).populate('user', { name: 1 })
 
     res.json(savedBlog.toJSON())
 })
